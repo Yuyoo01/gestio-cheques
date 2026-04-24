@@ -36,16 +36,18 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
         
         {/* Listos para cobrar */}
         <div>
-          <button 
-            onClick={onOpenModal}
-            className="w-full flex items-center justify-between text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 group hover:text-brand-600 transition-colors cursor-pointer text-left"
-          >
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
               <CheckCircle2 size={16} className="text-brand-500" />
               Listos para cobrar ({listosParaCobrar.length})
-            </div>
-            <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
+            </h3>
+            <button 
+              onClick={onOpenModal}
+              className="text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              Detalles
+            </button>
+          </div>
           <div className="space-y-3">
             {listosParaCobrar.length === 0 ? (
               <p className="text-sm text-gray-400 italic">No hay cheques listos para cobrar.</p>
@@ -68,10 +70,17 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
 
         {/* Próximos a cobrar */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Calendar size={16} className="text-blue-500" />
-            Próximos a Cobrar ({proximosACobrar.length})
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+              <Calendar size={16} className="text-blue-500" />
+              Próximos a Cobrar ({proximosACobrar.length})
+            </h3>
+            <button 
+              className="text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              Detalles
+            </button>
+          </div>
           <div className="space-y-3">
             {proximosACobrar.length === 0 ? (
               <p className="text-sm text-gray-400 italic">No hay cobros próximos en los siguientes 15 días.</p>
@@ -97,10 +106,17 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
 
         {/* Vencimiento Inminente */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <AlertCircle size={16} className="text-orange-500" />
-            Vencimiento Legal Inminente ({vencimientoInminente.length})
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+              <AlertCircle size={16} className="text-orange-500" />
+              Venc. Inminente ({vencimientoInminente.length})
+            </h3>
+            <button 
+              className="text-xs font-semibold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              Detalles
+            </button>
+          </div>
           <div className="space-y-3">
             {vencimientoInminente.length === 0 ? (
               <p className="text-sm text-gray-400 italic">No hay vencimientos próximos.</p>
