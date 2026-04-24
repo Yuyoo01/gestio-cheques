@@ -3,7 +3,7 @@ import { parseISO, isBefore, isToday, differenceInDays, startOfDay } from 'date-
 import { Wallet, AlertCircle, CheckCircle2, Clock, ChevronRight, Calendar } from 'lucide-react';
 import MiniCalendar from './MiniCalendar';
 
-export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
+export default function Sidebar({ cheques, listosParaCobrar, onOpenModal, isOpen, onClose }) {
   const [showListos, setShowListos] = useState(false);
   const [showProximos, setShowProximos] = useState(false);
   const [showInminentes, setShowInminentes] = useState(false);
@@ -25,15 +25,33 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
   }).sort((a, b) => new Date(a.fecha_pago) - new Date(b.fecha_pago));
 
   return (
-    <aside className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm z-10">
-      <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-        <div className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
-          LT
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900/50 z-40 md:hidden transition-opacity" 
+          onClick={onClose}
+        />
+      )}
+      
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-2xl md:shadow-sm transform transition-transform duration-300 ease-in-out
+        md:relative md:translate-x-0
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+      <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+            LT
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 leading-tight">Lona-Truck</h2>
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Gestión de Cheques</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 leading-tight">Lona-Truck</h2>
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Gestión de Cheques</p>
-        </div>
+        <button className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg" onClick={onClose}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-8">
@@ -167,5 +185,6 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
 
       </div>
     </aside>
+    </>
   );
 }
