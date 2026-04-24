@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vista Previa - Gestio cheques lona-truck</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 
+              500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 900: '#134e4a',
+            }
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- React & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // --- Mock Icons (SVG Components) ---
+    const IconWallet = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
+    const IconAlert = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>;
+    const IconCheck = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>;
+    const IconClock = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+    const IconFile = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>;
+    const IconUser = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+    const IconBuilding = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>;
+    const IconDollar = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
+    const IconCalendar = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>;
+    const IconSend = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>;
+
+    // --- Mock Data ---
+    const mockCheques = [
+      { id: 1, cliente: "Transportes Gómez", monto: 150000, banco: "Galicia", fecha_pago: "2023-10-01", estado: 'pendiente', fecha_vencimiento_legal: new Date(Date.now() + 86400000 * 3).toISOString() }, // Vence en 3 dias
+      { id: 2, cliente: "Repuestos El Sol", monto: 230500, banco: "Santander", fecha_pago: new Date().toISOString(), estado: 'pendiente', fecha_vencimiento_legal: new Date(Date.now() + 86400000 * 30).toISOString() }, // Listo para cobrar hoy
+    ];
+
+    // --- Components ---
+    function Sidebar() {
+      return (
+        <aside className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm z-10 shrink-0">
+          <div className="p-6 border-b border-gray-100 flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">LT</div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 leading-tight">Lona-Truck</h2>
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Gestión de Cheques</p>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-8">
+            {/* Listos para cobrar */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span className="text-brand-500"><IconCheck /></span>
+                Listos para cobrar (1)
+              </h3>
+              <div className="space-y-3">
+                <div className="bg-brand-50 rounded-lg p-3 border border-brand-100 hover:shadow-md transition-shadow cursor-pointer">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-semibold text-gray-900 truncate pr-2">Repuestos El Sol</span>
+                    <span className="font-bold text-brand-700">$230.500</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <IconWallet /> <span>Santander</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Vencimiento Inminente */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span className="text-orange-500"><IconAlert /></span>
+                Vencimiento Inminente (1)
+              </h3>
+              <div className="space-y-3">
+                <div className="bg-orange-50 rounded-lg p-3 border border-orange-200 hover:shadow-md transition-shadow cursor-pointer">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-semibold text-gray-900 truncate pr-2">Transportes Gómez</span>
+                    <span className="font-bold text-gray-900">$150.000</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-medium text-orange-600">
+                    <span className="flex items-center gap-1">
+                      <IconClock /> Vence legalmente en 3 días
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      );
+    }
+
+    function ChequeForm() {
+      const [tipo, setTipo] = useState('diferido');
+      return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <span className="text-brand-500"><IconFile /></span>
+            Ingresar Nuevo Cheque
+          </h2>
+
+          <div className="flex gap-2 p-1 bg-gray-100 rounded-xl mb-8 w-fit">
+            <button onClick={() => setTipo('al-dia')} className={`px-6 py-2 rounded-lg font-medium text-sm transition-all ${tipo === 'al-dia' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>Al día</button>
+            <button onClick={() => setTipo('diferido')} className={`px-6 py-2 rounded-lg font-medium text-sm transition-all ${tipo === 'diferido' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>Diferido</button>
+          </div>
+
+          <form className="space-y-6" onSubmit={e => { e.preventDefault(); alert('Demo: Cheque guardado (Visualización)'); }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IconUser /></div>
+                  <input type="text" className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500" placeholder="Nombre del cliente" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Banco</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IconBuilding /></div>
+                  <input type="text" className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500" placeholder="Nombre del banco" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IconDollar /></div>
+                  <input type="number" className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500" placeholder="0.00" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Número de Cheque</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IconFile /></div>
+                  <input type="text" className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500" placeholder="N° de serie" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Emisión</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IconCalendar /></div>
+                  <input type="date" className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500" />
+                </div>
+              </div>
+              {tipo === 'diferido' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Pago</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><span className="text-brand-500"><IconCalendar /></span></div>
+                    <input type="date" className="block w-full pl-10 pr-3 py-3 border border-brand-200 ring-1 ring-brand-100 rounded-xl focus:ring-2 focus:ring-brand-500 bg-brand-50/30" />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="pt-6 border-t border-gray-100 flex justify-end">
+              <button type="submit" className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-medium shadow-sm">
+                <IconSend /> <span>Registrar Cheque</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      );
+    }
+
+    function App() {
+      return (
+        <div className="flex w-full h-screen overflow-hidden bg-gray-100">
+          <Sidebar />
+          <main className="flex-1 overflow-y-auto p-8">
+            <header className="mb-8 flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel de Control</h1>
+                <p className="text-gray-500">Gestión de cartera de cheques Lona-Truck (Vista Previa)</p>
+              </div>
+              <div className="flex gap-4">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[200px]">
+                  <p className="text-sm text-gray-500 font-medium mb-1">Total en Cartera</p>
+                  <p className="text-2xl font-bold text-gray-900">$380.500</p>
+                </div>
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[200px] border-l-4 border-l-brand-500">
+                  <p className="text-sm text-gray-500 font-medium mb-1">Listos para Cobrar</p>
+                  <p className="text-2xl font-bold text-brand-600">$230.500</p>
+                </div>
+              </div>
+            </header>
+            <div className="max-w-3xl">
+              <ChequeForm />
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
