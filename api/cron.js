@@ -26,36 +26,36 @@ export default async function handler(request, response) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const mensajesAEnviar = [];
+    const chequesAAlertar = [];
 
     cheques.forEach(cheque => {
-      // Calcular diferencia en días
-      const fechaPago = new Date(cheque.fecha_pago);
-      fechaPago.setHours(0,0,0,0);
-      const diffPago = Math.ceil((fechaPago - today) / (1000 * 60 * 60 * 24));
-
       const fechaVencimiento = new Date(cheque.fecha_vencimiento_legal);
       fechaVencimiento.setHours(0,0,0,0);
       const diffVencimiento = Math.ceil((fechaVencimiento - today) / (1000 * 60 * 60 * 24));
 
-      let requiereAlerta = false;
+      const fechaPago = new Date(cheque.fecha_pago);
+      fechaPago.setHours(0,0,0,0);
+      const diffPago = Math.ceil((fechaPago - today) / (1000 * 60 * 60 * 24));
 
-      // 1 día antes de la fecha_pago
-      if (diffPago === 1) {
-        requiereAlerta = true;
-      }
-      
-      // 5 días antes de la fecha_vencimiento_legal
-      if (diffVencimiento === 5) {
-        requiereAlerta = true;
-      }
-
-      if (requiereAlerta) {
-        const montoFormateado = Number(cheque.monto).toLocaleString('es-AR');
-        const msj = `⚠️ Gestio cheques lona-truck: El cheque de ${cheque.cliente} (${cheque.banco}) por $${montoFormateado} requiere acción hoy o mañana.`;
-        mensajesAEnviar.push(msj);
+      // Filtramos cheques que estén por cobrar o vencer legalmente en los próximos 7 días
+      if ((diffVencimiento >= 0 && diffVencimiento <= 7) || (diffPago >= 0 && diffPago <= 7)) {
+        chequesAAlertar.push(cheque);
       }
     });
+
+    const mensajesAEnviar = [];
+
+    if (chequesAAlertar.length > 0) {
+      let msj = `*Aplicacion gestion de cheques LONA TRUCK*\n\nUsted tiene ${chequesAAlertar.length} cheques que vencen o se pueden cobrar en los proximos 7 dias:\n`;
+
+      chequesAAlertar.forEach(cheque => {
+        const montoFormateado = Number(cheque.monto).toLocaleString('es-AR');
+        msj += `----------\nCliente: ${cheque.cliente}\nNro cheque: ${cheque.numero_cheque || 'S/N'}\nMonto: $${montoFormateado}\nBanco: ${cheque.banco}\n`;
+      });
+      msj += `----------`;
+      
+      mensajesAEnviar.push(msj);
+    }
 
     // Enviar mensajes por CallMeBot
     const phone = process.env.CALLMEBOT_PHONE;
