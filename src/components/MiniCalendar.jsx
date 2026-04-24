@@ -60,8 +60,8 @@ export default function MiniCalendar({ cheques }) {
         {days.map((day, idx) => {
           const isCurrentMonth = isSameMonth(day, monthStart);
           
-          // Buscar si hay cheques que vencen comercialmente este día
-          const chequesDelDia = chequesPendientes.filter(c => isSameDay(parseISO(c.fecha_pago), day));
+          // Buscar si hay cheques que vencen legalmente este día (30 días después del pago)
+          const chequesDelDia = chequesPendientes.filter(c => isSameDay(parseISO(c.fecha_vencimiento_legal), day));
           const hasCheque = chequesDelDia.length > 0;
           
           const isTodayDate = isSameDay(day, new Date());
