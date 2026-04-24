@@ -5,12 +5,14 @@ import ChequeForm from './ChequeForm';
 import ChequesModal from './ChequesModal';
 import CarteraModal from './CarteraModal';
 import { addDays, isBefore, isToday, parseISO } from 'date-fns';
+import { Menu } from 'lucide-react';
 
 export default function Dashboard() {
   const [cheques, setCheques] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCarteraModalOpen, setIsCarteraModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchCheques = async () => {
     try {
@@ -68,24 +70,41 @@ export default function Dashboard() {
   const totalListos = listosParaCobrar.reduce((acc, curr) => acc + Number(curr.monto), 0);
 
   return (
-    <div className="flex w-full h-screen overflow-hidden bg-gray-100">
+    <div className="flex flex-col md:flex-row w-full h-screen overflow-hidden bg-gray-100 relative">
       <Sidebar 
         cheques={cheques} 
         listosParaCobrar={listosParaCobrar} 
         onOpenModal={() => setIsModalOpen(true)} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
       
-      <main className="flex-1 overflow-y-auto p-8 relative">
-        <header className="mb-8 flex justify-between items-end">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel de Control</h1>
-            <p className="text-gray-500">Gestión de cartera de cheques Lona-Truck</p>
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative w-full">
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-20">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">LT</div>
+            <h2 className="text-lg font-bold text-gray-900 leading-tight">Lona-Truck</h2>
           </div>
-          
-          <div className="flex gap-4">
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            <Menu size={24} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          <header className="mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">Panel de Control</h1>
+              <p className="text-sm md:text-base text-gray-500">Gestión de cartera de cheques Lona-Truck</p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 md:gap-4">
             <button 
               onClick={() => setIsCarteraModalOpen(true)}
-              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[200px] hover:bg-gray-50 hover:border-gray-200 transition-all text-left cursor-pointer group"
+              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex-1 md:min-w-[200px] hover:bg-gray-50 hover:border-gray-200 transition-all text-left cursor-pointer group"
             >
               <div className="flex justify-between items-center mb-1">
                 <p className="text-sm text-gray-500 font-medium group-hover:text-gray-700 transition-colors">Total en Cartera</p>
@@ -95,7 +114,7 @@ export default function Dashboard() {
             </button>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[200px] border-l-4 border-l-brand-500 hover:bg-brand-50 hover:border-brand-200 transition-all text-left cursor-pointer group"
+              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex-1 md:min-w-[200px] border-l-4 border-l-brand-500 hover:bg-brand-50 hover:border-brand-200 transition-all text-left cursor-pointer group"
             >
               <div className="flex justify-between items-center mb-1">
                 <p className="text-sm text-gray-500 font-medium group-hover:text-brand-600 transition-colors">Listos para Cobrar</p>
@@ -122,6 +141,7 @@ export default function Dashboard() {
           onClose={() => setIsCarteraModalOpen(false)}
           cheques={cheques}
         />
+        </div>
       </main>
     </div>
   );
