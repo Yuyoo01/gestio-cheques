@@ -1,8 +1,8 @@
 import React from 'react';
 import { parseISO, isBefore, isToday, differenceInDays } from 'date-fns';
-import { Wallet, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { Wallet, AlertCircle, CheckCircle2, Clock, ChevronRight } from 'lucide-react';
 
-export default function Sidebar({ cheques, listosParaCobrar }) {
+export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
   // Calcular vencimientos inminentes (próximos 7 días)
   const vencimientoInminente = cheques.filter(c => {
     if (c.estado !== 'pendiente') return false;
@@ -27,18 +27,24 @@ export default function Sidebar({ cheques, listosParaCobrar }) {
         
         {/* Listos para cobrar */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-brand-500" />
-            Listos para cobrar ({listosParaCobrar.length})
-          </h3>
+          <button 
+            onClick={onOpenModal}
+            className="w-full flex items-center justify-between text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 group hover:text-brand-600 transition-colors cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-brand-500" />
+              Listos para cobrar ({listosParaCobrar.length})
+            </div>
+            <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
           <div className="space-y-3">
             {listosParaCobrar.length === 0 ? (
               <p className="text-sm text-gray-400 italic">No hay cheques listos para cobrar.</p>
             ) : (
               listosParaCobrar.map(cheque => (
-                <div key={cheque.id} className="bg-brand-50 rounded-lg p-3 border border-brand-100 hover:shadow-md transition-shadow">
+                <div key={cheque.id} onClick={onOpenModal} className="bg-brand-50 rounded-lg p-3 border border-brand-100 hover:shadow-md hover:border-brand-300 transition-all cursor-pointer group">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="font-semibold text-gray-900 truncate pr-2">{cheque.cliente}</span>
+                    <span className="font-semibold text-gray-900 truncate pr-2 group-hover:text-brand-700 transition-colors">{cheque.cliente}</span>
                     <span className="font-bold text-brand-700">${Number(cheque.monto).toLocaleString('es-AR')}</span>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-gray-500">
