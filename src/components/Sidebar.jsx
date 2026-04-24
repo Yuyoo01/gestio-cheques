@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { parseISO, isBefore, isToday, differenceInDays, startOfDay } from 'date-fns';
 import { Wallet, AlertCircle, CheckCircle2, Clock, ChevronRight, Calendar } from 'lucide-react';
 import MiniCalendar from './MiniCalendar';
 
 export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
+  const [showListos, setShowListos] = useState(false);
+  const [showProximos, setShowProximos] = useState(false);
+  const [showInminentes, setShowInminentes] = useState(false);
+
   // Calcular vencimientos inminentes (próximos 7 días)
   const vencimientoInminente = cheques.filter(c => {
     if (c.estado !== 'pendiente') return false;
@@ -42,30 +46,32 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
               Listos para cobrar ({listosParaCobrar.length})
             </h3>
             <button 
-              onClick={onOpenModal}
+              onClick={() => setShowListos(!showListos)}
               className="text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
             >
               Detalles
             </button>
           </div>
-          <div className="space-y-3">
-            {listosParaCobrar.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">No hay cheques listos para cobrar.</p>
-            ) : (
-              listosParaCobrar.map(cheque => (
-                <div key={cheque.id} onClick={onOpenModal} className="bg-brand-50 rounded-lg p-3 border border-brand-100 hover:shadow-md hover:border-brand-300 transition-all cursor-pointer group">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-semibold text-gray-900 truncate pr-2 group-hover:text-brand-700 transition-colors">{cheque.cliente}</span>
-                    <span className="font-bold text-brand-700">${Number(cheque.monto).toLocaleString('es-AR')}</span>
+          {showListos && (
+            <div className="space-y-3">
+              {listosParaCobrar.length === 0 ? (
+                <p className="text-sm text-gray-400 italic">No hay cheques listos para cobrar.</p>
+              ) : (
+                listosParaCobrar.map(cheque => (
+                  <div key={cheque.id} onClick={onOpenModal} className="bg-brand-50 rounded-lg p-3 border border-brand-100 hover:shadow-md hover:border-brand-300 transition-all cursor-pointer group">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-semibold text-gray-900 truncate pr-2 group-hover:text-brand-700 transition-colors">{cheque.cliente}</span>
+                      <span className="font-bold text-brand-700">${Number(cheque.monto).toLocaleString('es-AR')}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Wallet size={12} />
+                      <span>{cheque.banco}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <Wallet size={12} />
-                    <span>{cheque.banco}</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
         {/* Próximos a cobrar */}
@@ -76,32 +82,35 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
               Próximos a Cobrar ({proximosACobrar.length})
             </h3>
             <button 
+              onClick={() => setShowProximos(!showProximos)}
               className="text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
             >
               Detalles
             </button>
           </div>
-          <div className="space-y-3">
-            {proximosACobrar.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">No hay cobros próximos en los siguientes 15 días.</p>
-            ) : (
-              proximosACobrar.map(cheque => {
-                const diasRestantes = differenceInDays(parseISO(cheque.fecha_pago), startOfDay(new Date()));
-                return (
-                  <div key={cheque.id} className="bg-blue-50 rounded-lg p-3 border border-blue-100 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-semibold text-gray-900 truncate pr-2">{cheque.cliente}</span>
-                      <span className="font-bold text-gray-900">${Number(cheque.monto).toLocaleString('es-AR')}</span>
+          {showProximos && (
+            <div className="space-y-3">
+              {proximosACobrar.length === 0 ? (
+                <p className="text-sm text-gray-400 italic">No hay cobros próximos en los siguientes 15 días.</p>
+              ) : (
+                proximosACobrar.map(cheque => {
+                  const diasRestantes = differenceInDays(parseISO(cheque.fecha_pago), startOfDay(new Date()));
+                  return (
+                    <div key={cheque.id} className="bg-blue-50 rounded-lg p-3 border border-blue-100 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-semibold text-gray-900 truncate pr-2">{cheque.cliente}</span>
+                        <span className="font-bold text-gray-900">${Number(cheque.monto).toLocaleString('es-AR')}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
+                        <Clock size={12} />
+                        <span>Se podrá cobrar en {diasRestantes} {diasRestantes === 1 ? 'día' : 'días'}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
-                      <Clock size={12} />
-                      <span>Se podrá cobrar en {diasRestantes} {diasRestantes === 1 ? 'día' : 'días'}</span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </div>
 
         {/* Vencimiento Inminente */}
@@ -112,36 +121,39 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
               Venc. Inminente ({vencimientoInminente.length})
             </h3>
             <button 
+              onClick={() => setShowInminentes(!showInminentes)}
               className="text-xs font-semibold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
             >
               Detalles
             </button>
           </div>
-          <div className="space-y-3">
-            {vencimientoInminente.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">No hay vencimientos próximos.</p>
-            ) : (
-              vencimientoInminente.map(cheque => {
-                const diasRestantes = differenceInDays(parseISO(cheque.fecha_vencimiento_legal), startOfDay(new Date()));
-                const isUrgent = diasRestantes <= 2;
-                
-                return (
-                  <div key={cheque.id} className={`rounded-lg p-3 border hover:shadow-md transition-shadow ${isUrgent ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-semibold text-gray-900 truncate pr-2">{cheque.cliente}</span>
-                      <span className="font-bold text-gray-900">${Number(cheque.monto).toLocaleString('es-AR')}</span>
+          {showInminentes && (
+            <div className="space-y-3">
+              {vencimientoInminente.length === 0 ? (
+                <p className="text-sm text-gray-400 italic">No hay vencimientos próximos.</p>
+              ) : (
+                vencimientoInminente.map(cheque => {
+                  const diasRestantes = differenceInDays(parseISO(cheque.fecha_vencimiento_legal), startOfDay(new Date()));
+                  const isUrgent = diasRestantes <= 2;
+                  
+                  return (
+                    <div key={cheque.id} className={`rounded-lg p-3 border hover:shadow-md transition-shadow ${isUrgent ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-semibold text-gray-900 truncate pr-2">{cheque.cliente}</span>
+                        <span className="font-bold text-gray-900">${Number(cheque.monto).toLocaleString('es-AR')}</span>
+                      </div>
+                      <div className={`flex items-center justify-between text-xs font-medium ${isUrgent ? 'text-red-600' : 'text-orange-600'}`}>
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          Vence legalmente en {diasRestantes} {diasRestantes === 1 ? 'día' : 'días'}
+                        </span>
+                      </div>
                     </div>
-                    <div className={`flex items-center justify-between text-xs font-medium ${isUrgent ? 'text-red-600' : 'text-orange-600'}`}>
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
-                        Vence legalmente en {diasRestantes} {diasRestantes === 1 ? 'día' : 'días'}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
+                  )
+                })
+              )}
+            </div>
+          )}
         </div>
 
         {/* Calendario de Vencimientos */}
