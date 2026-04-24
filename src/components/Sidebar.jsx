@@ -1,15 +1,23 @@
 import React from 'react';
-import { parseISO, isBefore, isToday, differenceInDays } from 'date-fns';
-import { Wallet, AlertCircle, CheckCircle2, Clock, ChevronRight } from 'lucide-react';
+import { parseISO, isBefore, isToday, differenceInDays, startOfDay } from 'date-fns';
+import { Wallet, AlertCircle, CheckCircle2, Clock, ChevronRight, Calendar } from 'lucide-react';
 
 export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
   // Calcular vencimientos inminentes (próximos 7 días)
   const vencimientoInminente = cheques.filter(c => {
     if (c.estado !== 'pendiente') return false;
     const vencimientoLegal = parseISO(c.fecha_vencimiento_legal);
-    const diasRestantes = differenceInDays(vencimientoLegal, new Date());
+    const diasRestantes = differenceInDays(vencimientoLegal, startOfDay(new Date()));
     return diasRestantes >= 0 && diasRestantes <= 7;
   }).sort((a, b) => new Date(a.fecha_vencimiento_legal) - new Date(b.fecha_vencimiento_legal));
+
+  // Calcular próximos a cobrar (próximos 15 días, que no estén ya listos)
+  const proximosACobrar = cheques.filter(c => {
+    if (c.estado !== 'pendiente') return false;
+    const pagoDate = parseISO(c.fecha_pago);
+    const diasRestantes = differenceInDays(pagoDate, startOfDay(new Date()));
+    return diasRestantes > 0 && diasRestantes <= 15;
+  }).sort((a, b) => new Date(a.fecha_pago) - new Date(b.fecha_pago));
 
   return (
     <aside className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm z-10">
@@ -57,6 +65,35 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
           </div>
         </div>
 
+        {/* Próximos a cobrar */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Calendar size={16} className="text-blue-500" />
+            Próximos a Cobrar ({proximosACobrar.length})
+          </h3>
+          <div className="space-y-3">
+            {proximosACobrar.length === 0 ? (
+              <p className="text-sm text-gray-400 italic">No hay cobros próximos en los siguientes 15 días.</p>
+            ) : (
+              proximosACobrar.map(cheque => {
+                const diasRestantes = differenceInDays(parseISO(cheque.fecha_pago), startOfDay(new Date()));
+                return (
+                  <div key={cheque.id} className="bg-blue-50 rounded-lg p-3 border border-blue-100 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-semibold text-gray-900 truncate pr-2">{cheque.cliente}</span>
+                      <span className="font-bold text-gray-900">${Number(cheque.monto).toLocaleString('es-AR')}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
+                      <Clock size={12} />
+                      <span>Se podrá cobrar en {diasRestantes} {diasRestantes === 1 ? 'día' : 'días'}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
         {/* Vencimiento Inminente */}
         <div>
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -68,7 +105,7 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
               <p className="text-sm text-gray-400 italic">No hay vencimientos próximos.</p>
             ) : (
               vencimientoInminente.map(cheque => {
-                const diasRestantes = differenceInDays(parseISO(cheque.fecha_vencimiento_legal), new Date());
+                const diasRestantes = differenceInDays(parseISO(cheque.fecha_vencimiento_legal), startOfDay(new Date()));
                 const isUrgent = diasRestantes <= 2;
                 
                 return (

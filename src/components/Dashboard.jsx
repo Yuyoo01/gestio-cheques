@@ -3,12 +3,14 @@ import { supabase } from '../lib/supabase';
 import Sidebar from './Sidebar';
 import ChequeForm from './ChequeForm';
 import ChequesModal from './ChequesModal';
+import CarteraModal from './CarteraModal';
 import { addDays, isBefore, isToday, parseISO } from 'date-fns';
 
 export default function Dashboard() {
   const [cheques, setCheques] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCarteraModalOpen, setIsCarteraModalOpen] = useState(false);
 
   const fetchCheques = async () => {
     try {
@@ -81,10 +83,16 @@ export default function Dashboard() {
           </div>
           
           <div className="flex gap-4">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[200px]">
-              <p className="text-sm text-gray-500 font-medium mb-1">Total en Cartera</p>
+            <button 
+              onClick={() => setIsCarteraModalOpen(true)}
+              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[200px] hover:bg-gray-50 hover:border-gray-200 transition-all text-left cursor-pointer group"
+            >
+              <div className="flex justify-between items-center mb-1">
+                <p className="text-sm text-gray-500 font-medium group-hover:text-gray-700 transition-colors">Total en Cartera</p>
+                <div className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full font-bold">Ver detalle</div>
+              </div>
               <p className="text-2xl font-bold text-gray-900">${totalCartera.toLocaleString('es-AR')}</p>
-            </div>
+            </button>
             <button 
               onClick={() => setIsModalOpen(true)}
               className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[200px] border-l-4 border-l-brand-500 hover:bg-brand-50 hover:border-brand-200 transition-all text-left cursor-pointer group"
@@ -107,6 +115,12 @@ export default function Dashboard() {
           onClose={() => setIsModalOpen(false)} 
           cheques={listosParaCobrar} 
           onCobrar={handleCobrar} 
+        />
+
+        <CarteraModal
+          isOpen={isCarteraModalOpen}
+          onClose={() => setIsCarteraModalOpen(false)}
+          cheques={cheques}
         />
       </main>
     </div>
