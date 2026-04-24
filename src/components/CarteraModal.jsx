@@ -1,9 +1,50 @@
 import React from 'react';
 import { X, Wallet, FileText, Calendar } from 'lucide-react';
-import { parseISO, format } from 'date-fns';
+import { parseISO, format, differenceInDays, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function CarteraModal({ isOpen, onClose, cheques }) {
+  const sortedCheques = [...cheques].sort((a, b) => new Date(a.fecha_vencimiento_legal) - new Date(b.fecha_vencimiento_legal));
+
+  const getChequeStatusInfo = (cheque) => {
+    const pagoDate = parseISO(cheque.fecha_pago);
+    const vencimientoLegal = parseISO(cheque.fecha_vencimiento_legal);
+    const today = startOfDay(new Date());
+
+    const diasParaVencer = differenceInDays(vencimientoLegal, today);
+    const diasParaCobrar = differenceInDays(pagoDate, today);
+
+    if (diasParaVencer <= 7) {
+      return {
+        bg: 'bg-red-50',
+        border: 'border-red-200',
+        text: 'text-red-900',
+        textMuted: 'text-red-600',
+        iconBg: 'bg-red-100',
+        iconText: 'text-red-700'
+      };
+    }
+
+    if (diasParaCobrar > 0) {
+      return {
+        bg: 'bg-blue-50',
+        border: 'border-blue-200',
+        text: 'text-blue-900',
+        textMuted: 'text-blue-600',
+        iconBg: 'bg-blue-100',
+        iconText: 'text-blue-700'
+      };
+    }
+
+    return {
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+      text: 'text-green-900',
+      textMuted: 'text-green-600',
+      iconBg: 'bg-green-100',
+      iconText: 'text-green-700'
+    };
+  };
   if (!isOpen) return null;
 
   return (
@@ -39,30 +80,33 @@ export default function CarteraModal({ isOpen, onClose, cheques }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {cheques.map(cheque => (
-                <div key={cheque.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:border-gray-300 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-gray-900">{cheque.cliente}</span>
+              {sortedCheques.map(cheque => {
+                const status = getChequeStatusInfo(cheque);
+                return (
+                  <div key={cheque.id} className={`p-4 rounded-xl border ${status.bg} ${status.border} hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`font-bold ${status.text}`}>{cheque.cliente}</span>
+                      </div>
+                      <div className={`flex flex-wrap items-center gap-3 text-xs ${status.textMuted}`}>
+                        <div className="flex items-center gap-1">
+                          <Wallet size={14} /> <span>{cheque.banco}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FileText size={14} /> <span>N° {cheque.numero_cheque}</span>
+                        </div>
+                        <div className={`flex items-center gap-1 ${status.iconText} font-medium ${status.iconBg} px-2 py-0.5 rounded`}>
+                          <Calendar size={14} /> 
+                          <span>Cobro: {format(parseISO(cheque.fecha_pago), 'dd/MM/yyyy')}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <Wallet size={14} /> <span>{cheque.banco}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FileText size={14} /> <span>N° {cheque.numero_cheque}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-brand-600 font-medium bg-brand-50 px-2 py-0.5 rounded">
-                        <Calendar size={14} /> 
-                        <span>Cobro: {format(parseISO(cheque.fecha_pago), 'dd/MM/yyyy')}</span>
-                      </div>
+                    <div className="text-right">
+                      <span className={`font-bold ${status.text} text-lg`}>${Number(cheque.monto).toLocaleString('es-AR')}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-bold text-gray-900 text-lg">${Number(cheque.monto).toLocaleString('es-AR')}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
