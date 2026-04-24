@@ -1,6 +1,7 @@
 import React from 'react';
 import { parseISO, isBefore, isToday, differenceInDays, startOfDay } from 'date-fns';
 import { Wallet, AlertCircle, CheckCircle2, Clock, ChevronRight, Calendar } from 'lucide-react';
+import MiniCalendar from './MiniCalendar';
 
 export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
   // Calcular vencimientos inminentes (próximos 7 días)
@@ -125,6 +126,15 @@ export default function Sidebar({ cheques, listosParaCobrar, onOpenModal }) {
               })
             )}
           </div>
+        </div>
+
+        {/* Calendario de Vencimientos */}
+        <div className="pt-4 border-t border-gray-100 mt-auto">
+          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Calendar size={16} className="text-gray-400" />
+            Calendario de Cobros
+          </h3>
+          <MiniCalendar cheques={cheques} />
         </div>
 
       </div>
